@@ -1,13 +1,129 @@
 const API_URL = 'http://localhost:8080';
 
+// Initialize and Fetch
+document.addEventListener('DOMContentLoaded', () => {
+    loadListas();
+});
+
+async function loadListas() {
+    // Alunos
+    try {
+        const alunos = await apiCall('/alunos', 'GET');
+        if (Array.isArray(alunos) && alunos.length > 0) {
+            let html = '<table class="data-table"><tr><th>ID</th><th>Nome</th><th>Email</th><th>CPF</th></tr>';
+            alunos.forEach(a => html += `<tr><td>${a.id}</td><td>${a.nomeCompleto}</td><td>${a.email}</td><td>${a.cpf}</td></tr>`);
+            html += '</table>';
+            document.getElementById('list-alunos').innerHTML = html;
+        } else {
+            document.getElementById('list-alunos').innerHTML = '<p style="color:var(--text-secondary)">Nenhum aluno cadastrado.</p>';
+        }
+    } catch(e) {}
+
+    // Professores
+    try {
+        const professores = await apiCall('/professores', 'GET');
+        if (Array.isArray(professores) && professores.length > 0) {
+            let html = '<table class="data-table"><tr><th>ID</th><th>Nome</th><th>Email</th><th>CPF</th></tr>';
+            professores.forEach(p => html += `<tr><td>${p.id}</td><td>${p.nomeCompleto}</td><td>${p.email}</td><td>${p.cpf}</td></tr>`);
+            html += '</table>';
+            document.getElementById('list-professores').innerHTML = html;
+        } else {
+            document.getElementById('list-professores').innerHTML = '<p style="color:var(--text-secondary)">Nenhum professor cadastrado.</p>';
+        }
+    } catch(e) {}
+
+    // Disciplinas
+    try {
+        const disciplinas = await apiCall('/disciplinas', 'GET');
+        if (Array.isArray(disciplinas) && disciplinas.length > 0) {
+            let html = '<table class="data-table"><tr><th>ID</th><th>Nome</th><th>Carga</th><th>Professor</th></tr>';
+            disciplinas.forEach(d => {
+                const profName = d.professor ? d.professor.nomeCompleto : '-';
+                html += `<tr><td>${d.id}</td><td>${d.nome}</td><td>${d.cargaHoraria}h</td><td>${profName}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('list-disciplinas').innerHTML = html;
+        } else {
+            document.getElementById('list-disciplinas').innerHTML = '<p style="color:var(--text-secondary)">Nenhuma disciplina cadastrada.</p>';
+        }
+    } catch(e) {}
+}
+
+async function loadProfessores() {
+    try {
+        const professores = await apiCall('/professores', 'GET');
+        const select = document.getElementById('disc-prof-id');
+        select.innerHTML = '<option value="" disabled selected>Selecione o Professor</option>';
+        if (Array.isArray(professores)) {
+            professores.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.nomeCompleto}</option>`;
+            });
+        }
+    } catch(e) {}
+}
+
+async function loadAlunosAndDisciplinas() {
+    try {
+        const alunos = await apiCall('/alunos', 'GET');
+        const disciplinas = await apiCall('/disciplinas', 'GET');
+        
+        const selectAlunoMat = document.getElementById('mat-aluno-id');
+        const selectAlunoHist = document.getElementById('hist-aluno-id');
+        const selectDiscMat = document.getElementById('mat-disc-id');
+        
+        let alunosHtml = '<option value="" disabled selected>Selecione o Aluno</option>';
+        if (Array.isArray(alunos)) {
+            alunos.forEach(a => {
+                alunosHtml += `<option value="${a.id}">${a.nomeCompleto}</option>`;
+            });
+        }
+        selectAlunoMat.innerHTML = alunosHtml;
+        selectAlunoHist.innerHTML = alunosHtml;
+
+        let discHtml = '<option value="" disabled selected>Selecione a Disciplina</option>';
+        if (Array.isArray(disciplinas)) {
+            disciplinas.forEach(d => {
+                discHtml += `<option value="${d.id}">${d.nome}</option>`;
+            });
+        }
+        selectDiscMat.innerHTML = discHtml;
+
+    } catch(e) {}
+}
+
+async function loadMatriculas() {
+    try {
+        const matriculas = await apiCall('/matriculas', 'GET');
+        const selectNota = document.getElementById('nota-mat-id');
+        const selectTrancar = document.getElementById('trancar-mat-id');
+        let matHtml = '<option value="" disabled selected>Selecione a Matrícula</option>';
+        if (Array.isArray(matriculas)) {
+            matriculas.forEach(m => {
+                const alunoNome = m.aluno ? m.aluno.nomeCompleto : 'Sem Nome';
+                const discNome = m.disciplina ? m.disciplina.nome : 'Sem Disciplina';
+                matHtml += `<option value="${m.id}">${alunoNome} - ${discNome} (${m.status})</option>`;
+            });
+        }
+        selectNota.innerHTML = matHtml;
+        selectTrancar.innerHTML = matHtml;
+    } catch(e) {}
+}
+
 // Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         
+        const target = e.target.dataset.target;
         document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById(e.target.dataset.target).classList.add('active');
+        document.getElementById(target).classList.add('active');
+        
+        // Load data dynamically
+        if (target === 'alunos' || target === 'professores') loadListas();
+        if (target === 'disciplinas') { loadProfessores(); loadListas(); }
+        if (target === 'matriculas') { loadAlunosAndDisciplinas(); loadMatriculas(); }
+        if (target === 'historico') loadAlunosAndDisciplinas();
     });
 });
 
@@ -30,8 +146,15 @@ async function apiCall(endpoint, method, body = null) {
         
         const res = await fetch(`${API_URL}${endpoint}`, options);
         if (!res.ok) {
-            const errorMsg = await res.text();
-            throw new Error(errorMsg || 'Erro na requisição');
+            let errorMsg = 'Erro na requisição';
+            try {
+                const errorData = await res.json();
+                if (errorData.message) errorMsg = errorData.message;
+                else if (typeof errorData === 'string') errorMsg = errorData;
+            } catch (e) {
+                errorMsg = await res.text() || errorMsg;
+            }
+            throw new Error(errorMsg);
         }
         
         if (res.status !== 204 && res.status !== 201) {
@@ -45,64 +168,59 @@ async function apiCall(endpoint, method, body = null) {
     }
 }
 
-// Aluno Form
+// Forms
 document.getElementById('form-aluno').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = {
+    await apiCall('/alunos', 'POST', {
         nomeCompleto: document.getElementById('aluno-nome').value,
         email: document.getElementById('aluno-email').value,
         cpf: document.getElementById('aluno-cpf').value
-    };
-    await apiCall('/alunos', 'POST', payload);
+    });
     showToast('Aluno cadastrado!');
     e.target.reset();
+    loadListas();
 });
 
-// Professor Form
 document.getElementById('form-professor').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = {
+    await apiCall('/professores', 'POST', {
         nomeCompleto: document.getElementById('prof-nome').value,
         email: document.getElementById('prof-email').value,
         cpf: document.getElementById('prof-cpf').value
-    };
-    await apiCall('/professores', 'POST', payload);
+    });
     showToast('Professor cadastrado!');
     e.target.reset();
+    loadListas();
 });
 
-// Disciplina Form
 document.getElementById('form-disciplina').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = {
+    await apiCall('/disciplinas', 'POST', {
         nome: document.getElementById('disc-nome').value,
         cargaHoraria: parseInt(document.getElementById('disc-carga').value),
         professor: { id: parseInt(document.getElementById('disc-prof-id').value) }
-    };
-    await apiCall('/disciplinas', 'POST', payload);
+    });
     showToast('Disciplina cadastrada!');
     e.target.reset();
+    loadListas();
 });
 
-// Matricula Form
 document.getElementById('form-matricula').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = {
+    await apiCall('/matriculas', 'POST', {
         aluno: { id: parseInt(document.getElementById('mat-aluno-id').value) },
         disciplina: { id: parseInt(document.getElementById('mat-disc-id').value) }
-    };
-    await apiCall('/matriculas', 'POST', payload);
+    });
     showToast('Matrícula realizada!');
     e.target.reset();
+    loadMatriculas();
 });
 
-// Atualizar Notas Form
 document.getElementById('form-notas').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('nota-mat-id').value;
     const n1 = document.getElementById('nota-1').value;
     const n2 = document.getElementById('nota-2').value;
-    
     const payload = {};
     if (n1) payload.nota1 = parseFloat(n1);
     if (n2) payload.nota2 = parseFloat(n2);
@@ -110,9 +228,18 @@ document.getElementById('form-notas').addEventListener('submit', async (e) => {
     await apiCall(`/matriculas/atualizar-notas/${id}`, 'PATCH', payload);
     showToast('Notas atualizadas!');
     e.target.reset();
+    loadMatriculas();
 });
 
-// Historico Form
+document.getElementById('form-trancar').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('trancar-mat-id').value;
+    await apiCall(`/matriculas/trancar/${id}`, 'PATCH');
+    showToast('Matrícula trancada com sucesso!');
+    e.target.reset();
+    loadMatriculas();
+});
+
 document.getElementById('form-historico').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('hist-aluno-id').value;

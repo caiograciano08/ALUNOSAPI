@@ -20,6 +20,12 @@ public class DisciplinaController {
         disciplinaService.criarDisciplina(disciplina);
     }
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Disciplina> listarTodasDisciplinas() {
+        return disciplinaService.listarTodasDisciplinas();
+    }
+
     @GetMapping("/professor/{professorId}")
     @ResponseStatus(HttpStatus.OK)
     public List<Disciplina> listarDisciplinasDoProf(

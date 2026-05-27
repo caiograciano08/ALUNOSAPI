@@ -6,6 +6,8 @@ import br.com.alunoonline.api.dtos.HistoricoAlunoResponseDTO;
 import br.com.alunoonline.api.enums.MatriculaAlunoStatusEnum;
 import br.com.alunoonline.api.model.Aluno;
 import br.com.alunoonline.api.model.MatriculaAluno;
+import br.com.alunoonline.api.repository.AlunoRepository;
+import br.com.alunoonline.api.repository.DisciplinaRepository;
 import br.com.alunoonline.api.repository.MatriculaAlunoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,33 @@ public class MatriculaAlunoService {
     @Autowired
     MatriculaAlunoRepository matriculaAlunoRepository;
 
+    @Autowired
+    AlunoRepository alunoRepository;
+
+    @Autowired
+    DisciplinaRepository disciplinaRepository;
+
     public void criarMatricula(MatriculaAluno matriculaAluno) {
+        if (matriculaAluno.getAluno() != null && matriculaAluno.getAluno().getId() != null) {
+            boolean alunoExiste = alunoRepository.existsById(matriculaAluno.getAluno().getId());
+            if (!alunoExiste) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O Aluno informado não existe!");
+            }
+        }
+        
+        if (matriculaAluno.getDisciplina() != null && matriculaAluno.getDisciplina().getId() != null) {
+            boolean disciplinaExiste = disciplinaRepository.existsById(matriculaAluno.getDisciplina().getId());
+            if (!disciplinaExiste) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A Disciplina informada não existe!");
+            }
+        }
+
         matriculaAluno.setStatus(MatriculaAlunoStatusEnum.MATRICULADO);
         matriculaAlunoRepository.save(matriculaAluno);
+    }
+
+    public List<MatriculaAluno> listarTodasMatriculas() {
+        return matriculaAlunoRepository.findAll();
     }
 
     public void trancarMatricula(Long id) {
