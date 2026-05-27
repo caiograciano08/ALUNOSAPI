@@ -8,6 +8,7 @@
     --accent-hover: #2563eb;
     --success: #10b981;
     --danger: #ef4444;
+    --danger-hover: #dc2626;
     --border: rgba(255, 255, 255, 0.1);
 }
 
@@ -147,7 +148,20 @@ body {
 .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 1rem;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    height: 100%;
+}
+
+.form-card form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .input-group {
@@ -224,6 +238,48 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
+.btn.danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn.danger:hover {
+    background: var(--danger-hover);
+    transform: translateY(-2px);
+}
+
+/* Tables */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.data-table th, .data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+    background: rgba(0,0,0,0.3);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+}
+
 /* History Layout */
 .historico-header {
     background: rgba(0, 0, 0, 0.2);
@@ -281,6 +337,7 @@ body {
     transform: translateY(100px);
     opacity: 0;
     transition: all 0.3s ease;
+    z-index: 1000;
 }
 
 .toast.show {
