@@ -17,7 +17,7 @@
                 <button class="nav-btn active" data-target="alunos">Alunos</button>
                 <button class="nav-btn" data-target="professores">Professores</button>
                 <button class="nav-btn" data-target="disciplinas">Disciplinas</button>
-                <button class="nav-btn" data-target="matriculas">Matrículas</button>
+                <button class="nav-btn" data-target="matriculas">Matrículas & Notas</button>
                 <button class="nav-btn special" data-target="historico">Emitir Histórico</button>
             </nav>
         </aside>
@@ -81,8 +81,10 @@
                         <div class="input-group">
                             <input type="number" id="disc-carga" placeholder="Carga Horária" required>
                         </div>
-                        <div class="input-group">
-                            <input type="number" id="disc-prof-id" placeholder="ID do Professor" required>
+                        <div class="input-group select-wrapper">
+                            <select id="disc-prof-id" required>
+                                <option value="" disabled selected>Selecione o Professor</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn primary">Cadastrar Disciplina</button>
                     </form>
@@ -100,11 +102,15 @@
                     <div class="card glass-card form-card">
                         <h3>Nova Matrícula</h3>
                         <form id="form-matricula">
-                            <div class="input-group" style="margin-top: 1.5rem">
-                                <input type="number" id="mat-aluno-id" placeholder="ID do Aluno" required>
+                            <div class="input-group select-wrapper" style="margin-top: 1.5rem">
+                                <select id="mat-aluno-id" required>
+                                    <option value="" disabled selected>Selecione o Aluno</option>
+                                </select>
                             </div>
-                            <div class="input-group">
-                                <input type="number" id="mat-disc-id" placeholder="ID da Disciplina" required>
+                            <div class="input-group select-wrapper">
+                                <select id="mat-disc-id" required>
+                                    <option value="" disabled selected>Selecione a Disciplina</option>
+                                </select>
                             </div>
                             <button type="submit" class="btn primary">Matricular</button>
                         </form>
@@ -113,8 +119,10 @@
                     <div class="card glass-card form-card">
                         <h3>Lançar Notas</h3>
                         <form id="form-notas">
-                            <div class="input-group" style="margin-top: 1.5rem">
-                                <input type="number" id="nota-mat-id" placeholder="ID da Matrícula" required>
+                            <div class="input-group select-wrapper" style="margin-top: 1.5rem">
+                                <select id="nota-mat-id" required>
+                                    <option value="" disabled selected>Selecione a Matrícula</option>
+                                </select>
                             </div>
                             <div class="input-group">
                                 <input type="number" step="0.1" id="nota-1" placeholder="Nota 1">
@@ -136,9 +144,11 @@
                 </div>
                 <div class="card glass-card form-card">
                     <form id="form-historico">
-                        <div class="input-group search-group">
-                            <input type="number" id="hist-aluno-id" placeholder="ID do Aluno" required>
-                            <button type="submit" class="btn primary">Buscar Histórico</button>
+                        <div class="input-group search-group select-wrapper">
+                            <select id="hist-aluno-id" required style="flex: 1">
+                                <option value="" disabled selected>Selecione o Aluno</option>
+                            </select>
+                            <button type="submit" class="btn primary" style="width: auto">Buscar</button>
                         </div>
                     </form>
                 </div>

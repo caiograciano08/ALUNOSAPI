@@ -1,13 +1,80 @@
 const API_URL = 'http://localhost:8080';
 
+// Fetch Dropdowns Dynamically
+async function loadProfessores() {
+    try {
+        const professores = await apiCall('/professores', 'GET');
+        const select = document.getElementById('disc-prof-id');
+        select.innerHTML = '<option value="" disabled selected>Selecione o Professor</option>';
+        if (Array.isArray(professores)) {
+            professores.forEach(p => {
+                select.innerHTML += `<option value="${p.id}">${p.nomeCompleto} (CPF: ${p.cpf})</option>`;
+            });
+        }
+    } catch(e) { console.error("Erro ao carregar professores:", e); }
+}
+
+async function loadAlunosAndDisciplinas() {
+    try {
+        const alunos = await apiCall('/alunos', 'GET');
+        const disciplinas = await apiCall('/disciplinas', 'GET');
+        
+        const selectAlunoMat = document.getElementById('mat-aluno-id');
+        const selectAlunoHist = document.getElementById('hist-aluno-id');
+        const selectDiscMat = document.getElementById('mat-disc-id');
+        
+        let alunosHtml = '<option value="" disabled selected>Selecione o Aluno</option>';
+        if (Array.isArray(alunos)) {
+            alunos.forEach(a => {
+                alunosHtml += `<option value="${a.id}">${a.nomeCompleto} (CPF: ${a.cpf})</option>`;
+            });
+        }
+        selectAlunoMat.innerHTML = alunosHtml;
+        selectAlunoHist.innerHTML = alunosHtml;
+
+        let discHtml = '<option value="" disabled selected>Selecione a Disciplina</option>';
+        if (Array.isArray(disciplinas)) {
+            disciplinas.forEach(d => {
+                discHtml += `<option value="${d.id}">${d.nome} (Carga: ${d.cargaHoraria}h)</option>`;
+            });
+        }
+        selectDiscMat.innerHTML = discHtml;
+
+    } catch(e) { console.error("Erro ao carregar alunos/disciplinas:", e); }
+}
+
+async function loadMatriculas() {
+    try {
+        const matriculas = await apiCall('/matriculas', 'GET');
+        const select = document.getElementById('nota-mat-id');
+        select.innerHTML = '<option value="" disabled selected>Selecione a Matrícula</option>';
+        if (Array.isArray(matriculas)) {
+            matriculas.forEach(m => {
+                const alunoNome = m.aluno ? m.aluno.nomeCompleto : 'Sem Nome';
+                const discNome = m.disciplina ? m.disciplina.nome : 'Sem Disciplina';
+                select.innerHTML += `<option value="${m.id}">${alunoNome} - ${discNome} (${m.status})</option>`;
+            });
+        }
+    } catch(e) { console.error("Erro ao carregar matrículas:", e); }
+}
+
 // Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         
+        const target = e.target.dataset.target;
         document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById(e.target.dataset.target).classList.add('active');
+        document.getElementById(target).classList.add('active');
+        
+        // Load data dynamically based on view
+        if (target === 'disciplinas') loadProfessores();
+        if (target === 'matriculas') {
+            loadAlunosAndDisciplinas();
+            loadMatriculas();
+        }
+        if (target === 'historico') loadAlunosAndDisciplinas();
     });
 });
 
@@ -30,8 +97,15 @@ async function apiCall(endpoint, method, body = null) {
         
         const res = await fetch(`${API_URL}${endpoint}`, options);
         if (!res.ok) {
-            const errorMsg = await res.text();
-            throw new Error(errorMsg || 'Erro na requisição');
+            let errorMsg = 'Erro na requisição';
+            try {
+                const errorData = await res.json();
+                if (errorData.message) errorMsg = errorData.message;
+                else if (typeof errorData === 'string') errorMsg = errorData;
+            } catch (e) {
+                errorMsg = await res.text() || errorMsg;
+            }
+            throw new Error(errorMsg);
         }
         
         if (res.status !== 204 && res.status !== 201) {
@@ -94,6 +168,7 @@ document.getElementById('form-matricula').addEventListener('submit', async (e) =
     await apiCall('/matriculas', 'POST', payload);
     showToast('Matrícula realizada!');
     e.target.reset();
+    loadMatriculas(); // Reload the mat list for notes
 });
 
 // Atualizar Notas Form
@@ -110,6 +185,7 @@ document.getElementById('form-notas').addEventListener('submit', async (e) => {
     await apiCall(`/matriculas/atualizar-notas/${id}`, 'PATCH', payload);
     showToast('Notas atualizadas!');
     e.target.reset();
+    loadMatriculas(); // To update the select dropdown display name if status changed
 });
 
 // Historico Form
