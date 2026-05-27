@@ -5,13 +5,18 @@ import br.com.alunoonline.api.repository.DisciplinaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DisciplinaService {
-
     @Autowired
     DisciplinaRepository disciplinaRepository;
 
-    public void criarDiscipina(Disciplina disciplina) {
+    public void criarDisciplina(Disciplina disciplina) {
         disciplinaRepository.save(disciplina);
+    }
+
+    public List<Disciplina> listarDisciplinarDoProf(Long professorId) {
+        return disciplinaRepository.findByProfessorId(professorId);
     }
 }

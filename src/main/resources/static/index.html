@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluno Online | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Aluno<span>Online</span></h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-target="alunos">Alunos</button>
+                <button class="nav-btn" data-target="professores">Professores</button>
+                <button class="nav-btn" data-target="disciplinas">Disciplinas</button>
+                <button class="nav-btn" data-target="matriculas">Matrículas</button>
+                <button class="nav-btn special" data-target="historico">Emitir Histórico</button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- ALUNOS SECTION -->
+            <section id="alunos" class="view-section active">
+                <div class="header">
+                    <h2>Gerenciar Alunos</h2>
+                    <p>Adicione novos alunos ao sistema.</p>
+                </div>
+                <div class="card glass-card form-card">
+                    <form id="form-aluno">
+                        <div class="input-group">
+                            <input type="text" id="aluno-nome" placeholder="Nome Completo" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="aluno-email" placeholder="Email" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="aluno-cpf" placeholder="CPF" required>
+                        </div>
+                        <button type="submit" class="btn primary">Cadastrar Aluno</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- PROFESSORES SECTION -->
+            <section id="professores" class="view-section">
+                <div class="header">
+                    <h2>Gerenciar Professores</h2>
+                    <p>Adicione novos professores.</p>
+                </div>
+                <div class="card glass-card form-card">
+                    <form id="form-professor">
+                        <div class="input-group">
+                            <input type="text" id="prof-nome" placeholder="Nome Completo" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="prof-email" placeholder="Email" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="prof-cpf" placeholder="CPF" required>
+                        </div>
+                        <button type="submit" class="btn primary">Cadastrar Professor</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- DISCIPLINAS SECTION -->
+            <section id="disciplinas" class="view-section">
+                <div class="header">
+                    <h2>Gerenciar Disciplinas</h2>
+                    <p>Crie disciplinas e vincule professores.</p>
+                </div>
+                <div class="card glass-card form-card">
+                    <form id="form-disciplina">
+                        <div class="input-group">
+                            <input type="text" id="disc-nome" placeholder="Nome da Disciplina" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="disc-carga" placeholder="Carga Horária" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="disc-prof-id" placeholder="ID do Professor" required>
+                        </div>
+                        <button type="submit" class="btn primary">Cadastrar Disciplina</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- MATRICULAS SECTION -->
+            <section id="matriculas" class="view-section">
+                <div class="header">
+                    <h2>Gerenciar Matrículas</h2>
+                    <p>Matricule alunos, lance notas ou tranque matrículas.</p>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="card glass-card form-card">
+                        <h3>Nova Matrícula</h3>
+                        <form id="form-matricula">
+                            <div class="input-group" style="margin-top: 1.5rem">
+                                <input type="number" id="mat-aluno-id" placeholder="ID do Aluno" required>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" id="mat-disc-id" placeholder="ID da Disciplina" required>
+                            </div>
+                            <button type="submit" class="btn primary">Matricular</button>
+                        </form>
+                    </div>
+
+                    <div class="card glass-card form-card">
+                        <h3>Lançar Notas</h3>
+                        <form id="form-notas">
+                            <div class="input-group" style="margin-top: 1.5rem">
+                                <input type="number" id="nota-mat-id" placeholder="ID da Matrícula" required>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" step="0.1" id="nota-1" placeholder="Nota 1">
+                            </div>
+                            <div class="input-group">
+                                <input type="number" step="0.1" id="nota-2" placeholder="Nota 2">
+                            </div>
+                            <button type="submit" class="btn secondary">Atualizar Notas</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTORICO SECTION -->
+            <section id="historico" class="view-section">
+                <div class="header">
+                    <h2>Histórico Escolar</h2>
+                    <p>Consulte o histórico completo de um aluno.</p>
+                </div>
+                <div class="card glass-card form-card">
+                    <form id="form-historico">
+                        <div class="input-group search-group">
+                            <input type="number" id="hist-aluno-id" placeholder="ID do Aluno" required>
+                            <button type="submit" class="btn primary">Buscar Histórico</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="historico-resultado" class="hidden">
+                    <!-- Gerado pelo JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
